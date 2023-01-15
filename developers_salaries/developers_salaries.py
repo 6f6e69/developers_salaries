@@ -47,7 +47,7 @@ class VacanciesPortal():
         self.vacancies: list = []
         self.LANGUAGES: Iterable = ()
 
-    def print_languages_stats_table(self) -> None:
+    def languages_stats_table(self) -> AsciiTable.table:
         table_data: list = [('Язык программирования',
                              'Вакансий найдено',
                              'Вакансий обработано',
@@ -57,7 +57,7 @@ class VacanciesPortal():
             if language_stats:
                 table_data.append(language_stats)
         table_instance: AsciiTable = AsciiTable(table_data, self.portal_name)
-        print(table_instance.table)
+        return table_instance.table
 
     def _get_language_stats(self, language: str) -> tuple[str, int, int, int]:
         found: int = 0
@@ -98,10 +98,12 @@ class HeadHunter(VacanciesPortal):
 
     def _get_vacancies_by_language(self, language: str) -> None:
         vacancies_url: str = parse.urljoin(self.API_URL, 'vacancies')
+        DEVELOPER_PROFESSION_ROLE_ID: str = '96'
+        MOSCOW_TOWN_ID: str = '1'
         params: dict[str, str] = {
             'text': f'Программист {language}',
-            'area': '1',
-            'professional_role': '96',
+            'area': MOSCOW_TOWN_ID,
+            'professional_role': DEVELOPER_PROFESSION_ROLE_ID,
             'only_with_salary': 'true',
         }
         for vacancy in self._fetch_records(vacancies_url,
@@ -138,13 +140,14 @@ class SuperJob(VacanciesPortal):
 
     def _get_vacancies_by_language(self, language: str) -> None:
         vacancies_url: str = parse.urljoin(self.API_URL, '2.0/vacancies')
+        DEVELOPMENT_CATALOGUE_ID: str = '48'
         headers: dict[str, str] = {
             'X-Api-App-Id': self.CLIENT_SECRET,
         }
         params: dict[str, str] = {
             'keyword': f'Программист {language}',
             'town': 'Москва',
-            'catalogues': '48',
+            'catalogues': DEVELOPMENT_CATALOGUE_ID,
             'no_agreement': '1',
             'count': '100',
         }
@@ -170,7 +173,7 @@ if __name__ == '__main__':
     except OSError:
         print("Can't open file languages file!")
     hh_portal: HeadHunter = HeadHunter(popular_languages)
-    hh_portal.print_languages_stats_table()
+    print(hh_portal.languages_stats_table())
     superjob: SuperJob = SuperJob(popular_languages,
                                   env('SUPERJOB_CLIENT_SECRET'))
-    superjob.print_languages_stats_table()
+    print(superjob.languages_stats_table())
