@@ -48,15 +48,15 @@ class VacanciesPortal():
         self.LANGUAGES: Iterable = ()
 
     def languages_stats_table(self) -> AsciiTable.table:
-        table_data: list = [('Язык программирования',
+        table_rows: list = [('Язык программирования',
                              'Вакансий найдено',
                              'Вакансий обработано',
                              'Средняя зарплата')]
         for language in self.LANGUAGES:
             language_stats: tuple | None = self._get_language_stats(language)
             if language_stats:
-                table_data.append(language_stats)
-        table_instance: AsciiTable = AsciiTable(table_data, self.portal_name)
+                table_rows.append(language_stats)
+        table_instance: AsciiTable = AsciiTable(table_rows, self.portal_name)
         return table_instance.table
 
     def _get_language_stats(self, language: str) -> tuple[str, int, int, int]:
