@@ -4,6 +4,7 @@ from urllib import parse
 from itertools import count
 from terminaltables import AsciiTable
 from collections.abc import Iterator, Iterable
+from abc import ABC, abstractmethod
 
 
 class Vacancy():
@@ -41,7 +42,7 @@ class Vacancy():
                 return None
 
 
-class VacanciesPortal():
+class VacanciesPortal(ABC):
     def __init__(self, portal_name: str) -> None:
         self.portal_name: str = portal_name
         self.vacancies: list = []
@@ -76,6 +77,17 @@ class VacanciesPortal():
         else:
             return language, 0, 0, 0
 
+    @staticmethod
+    @abstractmethod
+    def _fetch_records(url: str,
+                       params: dict,
+                       headers: dict | None) -> Iterator:
+        pass
+
+    @abstractmethod
+    def _get_vacancies_by_language(self, language: str) -> None:
+        pass
+
 
 class HeadHunter(VacanciesPortal):
     def __init__(self, languages: Iterable) -> None:
@@ -86,10 +98,13 @@ class HeadHunter(VacanciesPortal):
             self._get_vacancies_by_language(language)
 
     @staticmethod
-    def _fetch_records(url: str, params: dict) -> Iterator:
+    def _fetch_records(url: str,
+                       params: dict, headers: dict | None = None) -> Iterator:
         for page in count():
             params['page'] = page
-            page_response: requests.Response = requests.get(url, params)
+            page_response: requests.Response = requests.get(url=url,
+                                                            params=params,
+                                                            headers=headers)
             page_response.raise_for_status()
             page_payload: dict = page_response.json()
             yield from page_payload['items']
@@ -126,7 +141,9 @@ class SuperJob(VacanciesPortal):
             self._get_vacancies_by_language(language)
 
     @staticmethod
-    def _fetch_records(url: str, params: dict, headers: dict) -> Iterator:
+    def _fetch_records(url: str,
+                       params: dict,
+                       headers: dict | None) -> Iterator:
         for page in count():
             params['page'] = page
             page_response: requests.Response = requests.get(url=url,
