@@ -123,7 +123,7 @@ def main() -> None:
                                        in file.read().splitlines()]
     except OSError:
         print("Can't open languages file!")
-    hh_table: AsciiTable = get_statistics_table(
+    hh_table: AsciiTable.table = get_statistics_table(
                                     'HeadHunter',
                                     popular_languages,
                                     get_hh_vacancies_avg_salary)
@@ -131,7 +131,7 @@ def main() -> None:
     get_superjob_vacancies_avg_salary_no_api_key: partial = partial(
                                              get_superjob_vacancies_avg_salary,
                                              api_key=SUPERJOB_CLIENT_SECRET)
-    superjob_table: AsciiTable = get_statistics_table(
+    superjob_table: AsciiTable.table = get_statistics_table(
                                   'SuperJob',
                                   popular_languages,
                                   get_superjob_vacancies_avg_salary_no_api_key)
