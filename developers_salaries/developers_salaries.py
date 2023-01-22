@@ -13,7 +13,7 @@ def get_statistics_table(portal_name: str,
                          'Вакансий найдено',
                          'Вакансий обработано',
                          'Средняя зарплата')]
-    for language in POPULAR_LANGUAGES:
+    for language in popular_languages:
         found: int = 0
         processed: int = 0
         salaries_sum: int = 0
@@ -51,19 +51,19 @@ def count_average_rur_salary(currency: str,
 def get_hh_vacancies_avg_salary(language: str) -> Generator[int | None,
                                                             None,
                                                             None]:
-    API_URL: str = 'https://api.hh.ru/'
-    VACANCIES_URL: str = parse.urljoin(API_URL, 'vacancies')
-    DEVELOPER_PROFESSION_ROLE_ID: str = '96'
-    MOSCOW_TOWN_ID: str = '1'
+    api_url: str = 'https://api.hh.ru/'
+    vacancies_url: str = parse.urljoin(api_url, 'vacancies')
+    developer_profession_id: str = '96'
+    moscow_town_id: str = '1'
     params: dict[str, str | int] = {
             'text': f'Программист {language}',
-            'area': MOSCOW_TOWN_ID,
-            'professional_role': DEVELOPER_PROFESSION_ROLE_ID,
+            'area': moscow_town_id,
+            'professional_role': developer_profession_id,
             'only_with_salary': 'true',
         }
     for page in count():
         params['page'] = page
-        page_response: requests.Response = requests.get(url=VACANCIES_URL,
+        page_response: requests.Response = requests.get(url=vacancies_url,
                                                         params=params)
         page_response.raise_for_status()
         page_payload: dict = page_response.json()
@@ -80,22 +80,22 @@ def get_hh_vacancies_avg_salary(language: str) -> Generator[int | None,
 def get_superjob_vacancies_avg_salary(language: str) -> Generator[int | None,
                                                                   None,
                                                                   None]:
-    API_URL: str = 'https://api.superjob.ru'
-    VACANCIES_URL: str = parse.urljoin(API_URL, '2.0/vacancies')
-    DEVELOPMENT_CATALOGUE_ID: str = '48'
+    api_url: str = 'https://api.superjob.ru'
+    vacancies_url: str = parse.urljoin(api_url, '2.0/vacancies')
+    development_catalogue_id: str = '48'
     headers: dict[str, str] = {
         'X-Api-App-Id': SUPERJOB_CLIENT_SECRET,
     }
     params: dict[str, str | int] = {
         'keyword': f'Программист {language}',
         'town': 'Москва',
-        'catalogues': DEVELOPMENT_CATALOGUE_ID,
+        'catalogues': development_catalogue_id,
         'no_agreement': '1',
         'count': '100',
     }
     for page in count():
         params['page'] = page
-        page_response: requests.Response = requests.get(url=VACANCIES_URL,
+        page_response: requests.Response = requests.get(url=vacancies_url,
                                                         params=params,
                                                         headers=headers)
         page_response.raise_for_status()
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     SUPERJOB_CLIENT_SECRET: str = env('SUPERJOB_CLIENT_SECRET')
     try:
         with open(env('LANGUAGES_FILE', default='languages.txt'), 'r') as file:
-            POPULAR_LANGUAGES: list = [line for line
+            popular_languages: list = [line for line
                                        in file.read().splitlines()]
     except OSError:
         print("Can't open languages file!")
