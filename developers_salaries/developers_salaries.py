@@ -4,9 +4,11 @@ from urllib import parse
 from itertools import count
 from collections.abc import Generator, Callable
 from terminaltables import AsciiTable
+from functools import partial
 
 
 def get_statistics_table(portal_name: str,
+                         popular_languages: list,
                          vacancies_salaries_generator: Callable
                          ) -> AsciiTable.table:
     table_rows: list = [('Язык программирования',
@@ -77,14 +79,15 @@ def get_hh_vacancies_avg_salary(language: str) -> Generator[int | None,
             break
 
 
-def get_superjob_vacancies_avg_salary(language: str) -> Generator[int | None,
-                                                                  None,
-                                                                  None]:
+def get_superjob_vacancies_avg_salary(language: str,
+                                      api_key: str) -> Generator[int | None,
+                                                                 None,
+                                                                 None]:
     api_url: str = 'https://api.superjob.ru'
     vacancies_url: str = parse.urljoin(api_url, '2.0/vacancies')
     development_catalogue_id: str = '48'
     headers: dict[str, str] = {
-        'X-Api-App-Id': SUPERJOB_CLIENT_SECRET,
+        'X-Api-App-Id': api_key,
     }
     params: dict[str, str | int] = {
         'keyword': f'Программист {language}',
@@ -110,7 +113,7 @@ def get_superjob_vacancies_avg_salary(language: str) -> Generator[int | None,
             break
 
 
-if __name__ == '__main__':
+def main() -> None:
     env: Env = Env()
     env.read_env()
     SUPERJOB_CLIENT_SECRET: str = env('SUPERJOB_CLIENT_SECRET')
@@ -122,9 +125,18 @@ if __name__ == '__main__':
         print("Can't open languages file!")
     hh_table: AsciiTable = get_statistics_table(
                                     'HeadHunter',
+                                    popular_languages,
                                     get_hh_vacancies_avg_salary)
     print(hh_table)
+    get_superjob_vacancies_avg_salary_no_api_key: partial = partial(
+                                             get_superjob_vacancies_avg_salary,
+                                             api_key=SUPERJOB_CLIENT_SECRET)
     superjob_table: AsciiTable = get_statistics_table(
-                                     'SuperJob',
-                                     get_superjob_vacancies_avg_salary)
+                                  'SuperJob',
+                                  popular_languages,
+                                  get_superjob_vacancies_avg_salary_no_api_key)
     print(superjob_table)
+
+
+if __name__ == '__main__':
+    main()
