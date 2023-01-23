@@ -116,7 +116,7 @@ def get_superjob_vacancies_avg_salary(language: str,
 def main() -> None:
     env: Env = Env()
     env.read_env()
-    SUPERJOB_CLIENT_SECRET: str = env('SUPERJOB_CLIENT_SECRET')
+    superjob_client_secret: str = env('SUPERJOB_CLIENT_SECRET')
     try:
         with open(env('LANGUAGES_FILE', default='languages.txt'), 'r') as file:
             popular_languages: list = [line for line
@@ -130,7 +130,7 @@ def main() -> None:
     print(hh_table)
     get_superjob_vacancies_avg_salary_no_api_key: partial = partial(
                                              get_superjob_vacancies_avg_salary,
-                                             api_key=SUPERJOB_CLIENT_SECRET)
+                                             api_key=superjob_client_secret)
     superjob_table: AsciiTable.table = get_statistics_table(
                                   'SuperJob',
                                   popular_languages,
